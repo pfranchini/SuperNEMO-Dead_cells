@@ -50,16 +50,18 @@ int main(int argc, char* argv[]){
   t1->SetBranchAddress("reco.calorimeter_hit_count",&reco_calorimeter_hit_count);
   
   int shorts=0;
+  int no_cal=0;
 
   Long64_t nentries = t1->GetEntries();
   for (Long64_t i=0;i<nentries;i++) {
     t1->GetEntry(i);
 
-    std::cout << i << std::endl;
+    /*    std::cout << i << std::endl;
     std::cout << "Tracks:  " << reco_track_count << std::endl;
     std::cout << "Tracker: " << reco_vertices_in_tracker << std::endl;
     std::cout << "Foil:    " << reco_foil_vertex_count << std::endl;
     std::cout << "Calo:    " << reco_calorimeter_hit_count << std::endl;
+    */
 
     if ((reco_track_count==1)&&(reco_foil_vertex_count==1)&&(reco_calorimeter_hit_count==1)) // Single tracks from foil to a calo
       efficiency->Fill(reco_track_count);
@@ -67,6 +69,8 @@ int main(int argc, char* argv[]){
       shorts++;
     if (reco_track_count!=1)
       efficiency->Fill(reco_track_count);
+    if (!reco_calorimeter_hit_count==1)
+      no_cal++;
     // Rejects single tracks that do not have a vertex on the foil and do not end up on the calorimeter
   }
 
@@ -74,7 +78,8 @@ int main(int argc, char* argv[]){
   std::cout << "Efficiency: " << eff*100 << " %"<< std::endl;
   std::cout << "Zero tracks: " << efficiency->GetBinContent(1)/t1->GetEntries()*100 << " %"<< std::endl;
   std::cout << "More than one track: " << 100-(efficiency->GetBinContent(1)+efficiency->GetBinContent(2)+shorts)/t1->GetEntries()*100 << " %"<< std::endl;
-  std::cout << "Short tracks: "<< shorts << std::endl;
+  std::cout << "Short tracks: "<< float(shorts)/t1->GetEntries()*100 << " %"<< std::endl;
+  std::cout << "No calorimenter hit: "<< float(no_cal)/t1->GetEntries()*100 << " %"<< std::endl;
 
 
   c1->cd();

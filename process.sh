@@ -1,3 +1,4 @@
+# Usage: ./process.sh [no arguments]
 #
 # Runs the full process:
 #
@@ -6,11 +7,12 @@
 # - reconstruct the brio file
 # - runs the sensitivity module on the reconstruted brio file
 # - calculate the tracks reconstruction efficiency on the sensitivity module output
+# - plots
 
 #==========================================================================================================
 
 FALAISE="/vols/build/snemo/Falaise.build/bin/"                   # Falaise binaries location
-INPUT="~/SuperNEMO/SN-IEgenerator/output/illumination_10k.tsim"  # Idealized generator output
+INPUT="~/SuperNEMO/SN-IEgenerator/output/illumination_1k.tsim"  # Idealized generator output
 WHERE=data                                                       # output directory
 FILE=output                                                      # name of the output file
 
@@ -48,11 +50,11 @@ do
     EFFICIENCY=`cat eff.log | grep Efficiency | awk '{print $2}'`
     ZERO=`cat eff.log | grep Zero | awk '{print $3}'`
     MORE=`cat eff.log | grep More | awk '{print $5}'`
+    SHORT=`cat eff.log | grep Short | awk '{print $3}'`
     rm -f eff.log
     
-    echo $DEAD_CELLS $EFFICIENCY $ZERO $MORE >> efficiency.txt
+    echo $DEAD_CELLS $EFFICIENCY $ZERO $MORE $SHORT >> efficiency.txt
     
-
 done
 
 python plot_efficiency.py

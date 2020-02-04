@@ -45,6 +45,10 @@ fi
 # Reconstruct simulation with dead channels
 ${FALAISE}flreconstruct -i ${WHERE}/${FILE}.brio -p data/official-2.0.0.conf -o ${WHERE}/${FILE}-reco.brio &> /dev/null
 
+if [[ "$?" -ne "0" ]]; then
+    exit
+fi
+
 # Runs the sensitivity module
 cd data
 /home/hep/pfranchi/SuperNEMO/MC/do_sensitivity.sh ${FILE}-reco

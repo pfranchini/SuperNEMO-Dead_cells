@@ -13,6 +13,7 @@
 #include "TH2F.h"
 #include "TStyle.h"
 #include "TTree.h"
+#include "TLine.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -56,6 +57,12 @@ static void show_usage(std::string name)
 	    << std::endl;
 }
 
+// Tracker dimensions:
+const double d = 44.0; 
+const double offsetx = 53.0;
+const double offsety = -2464.0;
+
+
 int main(int argc, char* argv[]){
 
   //if (argc < 4) {
@@ -65,7 +72,7 @@ int main(int argc, char* argv[]){
 
   //######################################################################################################################
 
-  float do_radius = false; // If `true` keeps the hit but set the radius to zero, if `false` removes the whole tracker hit
+  float do_radius = true; // If `true` keeps the hit but set the radius to zero, if `false` removes the whole tracker hit
   
   //######################################################################################################################
   
@@ -184,9 +191,13 @@ int main(int argc, char* argv[]){
     }
   }
 
+  // Fill TH2 with dead cells positions
   std::cout << "Number of dead cells: " << N_dead_cells << std::endl;
   for (Long64_t i=0; i<N_dead_cells; i++)
-    tracker->Fill(dead_cells[i][2],dead_cells[i][1]+dead_cells[i][0]*9);
+    if (dead_cells[i][0]==0)
+      tracker->Fill(dead_cells[i][2],8-dead_cells[i][1]);
+    else
+      tracker->Fill(dead_cells[i][2],dead_cells[i][1]+9);
       
   // Create a new file with a new tree
   std::vector<double>* dirx2 = new std::vector<double>;
@@ -282,12 +293,18 @@ int main(int argc, char* argv[]){
       
       kill=false;
       hits++;
-
+      
       // Find if this hit of this event is on any dead cell or not
       for (Long64_t k=0; k<N_dead_cells; k++){
 	if ( ((*grid_side)[i]==dead_cells[k][0]) && ((*grid_layer)[i]==dead_cells[k][1]) && ((*grid_column)[i]==dead_cells[k][2])  ){  // is dead
-	  //std::cout << (*wirex)[i] << "," << (*wirey)[i] << "," << (*wirez)[i] << std::endl;
-	  //std::cout << (*grid_side)[i] << "," << (*grid_layer)[i] << "," << (*grid_column)[i] << std::endl;
+	  /*	  std::cout << (*wirex)[i] << "," << (*wirey)[i] << "," << (*wirez)[i] << std::endl;
+	  std::cout << (*grid_side)[i] << "," << (*grid_layer)[i] << "," << (*grid_column)[i] << std::endl;
+	  if ((*grid_side)[i])
+	    std::cout << (*grid_layer)[i]*d+offsetx << "," << (*grid_column)[i]*d+offsety << std::endl << std::endl;
+	  else
+	    std::cout << -((*grid_layer)[i]*d+offsetx) << "," << (*grid_column)[i]*d+offsety << std::endl << std::endl;
+	  */
+	  
 	  kill=true;
 	  break; // ends loop since the hit is already on one dead cell
 	}
@@ -320,7 +337,7 @@ int main(int argc, char* argv[]){
 	  grid_layer2->push_back((*grid_layer)[i]);
 	  grid_column2->push_back((*grid_column)[i]);
 	  grid_id2->push_back((*grid_id)[i]);
-	  radius2->push_back(0);
+	  radius2->push_back(0);  // radius to 0
 	}
 	else // removes the whole tracker hit
 	  killed++;
@@ -357,9 +374,6 @@ int main(int argc, char* argv[]){
   front_view->GetXaxis()->SetTitle("Wire Y [mm]");
   front_view->GetYaxis()->SetTitle("Wire Z [mm]");
 
-  tracker->GetXaxis()->SetTitle("Column");
-  tracker->GetYaxis()->SetTitle("Layer");
-
   c1->cd(1);
   gPad->SetGrid();
   top_view->Draw("colz");
@@ -372,8 +386,14 @@ int main(int argc, char* argv[]){
   gPad->Modified(); gPad->Update();
 
   c2->cd();
+  tracker->GetXaxis()->SetTitle("Column");
+  tracker->GetYaxis()->SetTitle("Layer");
+  TLine *l=new TLine(0,8.5,113,8.5);
+  l->SetLineColor(kBlue);
+  l->SetLineWidth(3);
   tracker->Draw("colz");
-
+  l->Draw("same");
+  
   t2.Write();
   //f2->Close();  
 
@@ -383,8 +403,8 @@ int main(int argc, char* argv[]){
   else
     std::cout << "Radius set to zero for dead cells" << std::endl;
 
-  //c1->SaveAs("tracker.png");
-  //c2->SaveAs("tracker_DC.png");
+  c1->SaveAs("tracker.png");
+  c2->SaveAs("tracker_DC.png");
   //system("display tracker*.png");
 
   //f1->Close();

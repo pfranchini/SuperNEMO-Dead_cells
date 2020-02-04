@@ -34,3 +34,8 @@ Run the full process for several [0..2000] dead cells:
 ```
 process.sh
 ```
+
+Multiple randomizations for the same  <number_of_dead_cells>:
+```
+./process_test.sh 367  <number_of_dead_cells> (-d <list_of_dead_cells>)
+```

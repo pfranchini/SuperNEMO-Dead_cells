@@ -21,7 +21,7 @@ FILE=output                                                      # name of the o
 
 #==========================================================================================================
 
-echo -e "Run "$N" simulation for "${DEAD_CELLS}"dead cells each...\n"
+echo -e "Run "$N" simulation for "${DEAD_CELLS}" dead cells each...\n"
 
 rm -f efficiency_for_DC${DEAD_CELLS}.txt
 
@@ -55,9 +55,10 @@ do
     EFFICIENCY=`cat eff.log | grep Efficiency | awk '{print $2}'`
     ZERO=`cat eff.log | grep Zero | awk '{print $3}'`
     MORE=`cat eff.log | grep More | awk '{print $5}'`
+    SHORT=`cat eff.log | grep Short | awk '{print $3}'`
     rm -f eff.log
 
-    echo $DEAD_CELLS $EFFICIENCY $ZERO $MORE >> efficiency_for_DC${DEAD_CELLS}.txt
+    echo $DEAD_CELLS $EFFICIENCY $ZERO $MORE $SHORT >> efficiency_for_DC${DEAD_CELLS}.txt
 
 done
 
